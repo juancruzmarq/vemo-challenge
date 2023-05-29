@@ -15,7 +15,7 @@ import { PaisService } from 'src/pais/pais.service';
 export class PaisServiceJob {
   constructor(private readonly paisService: PaisService) {}
 
-  @Cron(CronExpression.EVERY_12_HOURS) // Se ejecuta todos los dias a la medianoche
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT) // Se ejecuta todos los dias a la medianoche
   async getPaises() {
     try {
       console.log('Ejecutando cron job');
@@ -29,6 +29,7 @@ export class PaisServiceJob {
         }),
       );
     } catch (error) {
+      console.log('Error al ejecutar el cron job', error);
       return error;
     }
   }
@@ -84,12 +85,12 @@ export class PaisServiceJob {
       });
       return paisesFormateados;
     } catch (error) {
-      console.log(error, 'formatPaises');
+      console.log('Error al formatear los paises', error);
       return error;
     }
   }
 
-  getMonedas(monedas: Currencies) {
+  private getMonedas(monedas: Currencies) {
     try {
       const monedasFormateadas = [];
       Object.keys(monedas).forEach((moneda) => {
@@ -97,12 +98,12 @@ export class PaisServiceJob {
       });
       return monedasFormateadas;
     } catch (error) {
-      console.log(error, 'getMonedas');
+      console.log('Error al formatear las monedas', error);
       return error;
     }
   }
 
-  getLanguages(languages: Languages) {
+  private getLanguages(languages: Languages) {
     try {
       const languagesFormateados = [];
       Object.keys(languages).forEach((language) => {
@@ -110,7 +111,7 @@ export class PaisServiceJob {
       });
       return languagesFormateados;
     } catch (error) {
-      console.log(error, 'getLanguages');
+      console.log('Error al formatear los lenguajes', error);
       return error;
     }
   }

@@ -46,8 +46,30 @@ $ npm run start:prod
 
 ### Descripcion de la solucion
 
-Para la solucion del problema se utilizo el framework NestJS, el cual es un framework de NodeJS que permite crear aplicaciones escalables y robustas, utilizando Typescript como lenguaje de programacion.
+1 - Revision del enunciado
+2 - Creacion basica del proyecto
+3 - Investigacion de la API a utilizar
+4 - Creacion de la base de datos y sus modelos
+5 - Creacion de los DTOs
+6 - Creacion de los controladores
+7 - Creacion de los servicios
+8 - Creacion de los jobs
 
-Para la base de datos se utilizo Postgres, y para la conexion con la base de datos se utilizo el ORM Sequelize.
+### Tecnologias
 
-Para la validacion de los datos se utilizo la libreria class-validator, la cual permite validar los datos de los DTOs de una manera sencilla y eficiente.
+- NodeJS
+- NestJS
+- Prisma
+- PostgreSQL
+- Swagger
+- class-validator
+- class-transformer
+
+#### Omiciones y supuestos
+
+- Se omitio crear los modulos de continente, lenguaje, moneda y capital.
+- Se omitio crear una tabla bandera
+- Se eligio solo el nombre comun del pais
+- Se omitio crear en cada llamada al job los registros, por el contrario se crea una vez y luego se actualiza.
+- En el caso de la busqueda por orden alfabetico, se ordena solo en una propiedad, es decir, si se ordena por nombre, no se puede ordenar por capital.
+- Se omitio la creacion de test unitarios y de integracion

@@ -2,7 +2,8 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePaisDto } from './dto/pais.dto';
 import { Pais } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
-import { PaisFormated } from 'src/interfaces/pais.formated';
+import { IPais, PaisFormated } from 'src/interfaces/pais.formated';
+import { Workbook, Worksheet } from 'exceljs';
 
 @Injectable()
 export class PaisService {
@@ -19,19 +20,13 @@ export class PaisService {
         },
       });
 
+      if (paises.length === 0) {
+        return new HttpException('Not Found', HttpStatus.NOT_FOUND);
+      }
+
+      // Se formatea la respuesta para que sea más fácil de consumir
       const paisesFormated = paises.map((pais) => {
-        return {
-          nombre: pais.nombre,
-          capital: pais.capitales.map((capital) => capital.nombre),
-          bandera: {
-            png: pais.png,
-            svg: pais.svg,
-            alt: pais.alt,
-          },
-          poblacion: pais.poblacion,
-          continente: pais.continentes.map((continente) => continente.nombre),
-          lenguaje: pais.lenguajes.map((lenguaje) => lenguaje.nombre),
-        };
+        return this.formatResponse(pais);
       });
       return paisesFormated;
     } catch (error) {
@@ -42,8 +37,130 @@ export class PaisService {
     }
   }
 
+  async findOne(id: number) {
+    try {
+      const pais = await this.prismaService.pais.findUnique({
+        where: {
+          id: id,
+        },
+        include: {
+          capitales: true,
+          continentes: true,
+          lenguajes: true,
+          monedas: true,
+        },
+      });
+
+      if (!pais) {
+        return new HttpException('Not Found', HttpStatus.NOT_FOUND);
+      }
+
+      // Se formatea la respuesta para que sea más fácil de consumir
+      const paisFormated = this.formatResponse(pais);
+
+      return paisFormated;
+    } catch (error) {
+      return new HttpException(
+        'Internal Server Error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async findBy(nombre: string, capital: string, continente: string) {
+    try {
+      const paises = await this.prismaService.pais.findMany({
+        where: {
+          nombre: nombre,
+          capitales: {
+            some: {
+              nombre: capital,
+            },
+          },
+          continentes: {
+            some: {
+              nombre: continente,
+            },
+          },
+        },
+        include: {
+          capitales: true,
+          continentes: true,
+          lenguajes: true,
+          monedas: true,
+        },
+      });
+
+      if (paises.length === 0) {
+        return new HttpException('Not Found', HttpStatus.NOT_FOUND);
+      }
+
+      // Se formatea la respuesta para que sea más fácil de consumir
+      const paisesFormated = paises.map((pais) => {
+        return this.formatResponse(pais);
+      });
+
+      return paisesFormated;
+    } catch (error) {
+      return new HttpException(
+        'Internal Server Error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async orderBy(order: string) {
+    try {
+      // Se obtienen todos los países con sus relaciones
+      const paises = await this.prismaService.pais.findMany({
+        include: {
+          capitales: true,
+          continentes: true,
+          lenguajes: true,
+          monedas: true,
+        },
+      });
+
+      if (paises.length === 0) {
+        return new HttpException('Not Found', HttpStatus.NOT_FOUND);
+      }
+
+      // Se formatea la respuesta para que sea más fácil de consumir
+      const paisesFormated = paises.map((pais) => {
+        return this.formatResponse(pais);
+      });
+
+      // Se ordena la respuesta según el parámetro recibido
+      switch (order) {
+        case 'nombre':
+          const paisesNombreFormated = paisesFormated.sort((a, b) =>
+            a.nombre.localeCompare(b.nombre),
+          );
+          return paisesNombreFormated;
+        case 'capital':
+          const paisesCapitalFormated = paisesFormated.sort((a, b) =>
+            a.capital[0].localeCompare(b.capital[0]),
+          );
+          return paisesCapitalFormated;
+        case 'continente':
+          const paisesContinenteFormated = paisesFormated.sort((a, b) =>
+            a.continente[0].localeCompare(b.continente[0]),
+          );
+          return paisesContinenteFormated;
+        default:
+          return paisesFormated;
+      }
+    } catch (error) {
+      return new HttpException(
+        'Internal Server Error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async create(data: CreatePaisDto): Promise<Pais | HttpException> {
     try {
+      // Se desestructura la data recibida
       const {
         nombre,
         capital,
@@ -54,6 +171,7 @@ export class PaisService {
         moneda,
       } = data;
 
+      // Se crea el pais en la base de datos y devuelve el pais creado o actualizado
       const pais = await this.prismaService.pais.upsert({
         where: {
           nombre: nombre,
@@ -63,14 +181,14 @@ export class PaisService {
           poblacion: poblacion,
           png: bandera.png,
           svg: bandera.svg,
-          alt: bandera.alt ? bandera.alt : nombre,
+          alt: bandera.alt ? bandera.alt : 'Bandera de ' + nombre,
         },
         create: {
           nombre: nombre,
           poblacion: poblacion,
           png: bandera.png,
           svg: bandera.svg,
-          alt: bandera.alt ? bandera.alt : nombre,
+          alt: bandera.alt ? bandera.alt : 'Bandera de ' + nombre,
         },
       });
 
@@ -178,5 +296,99 @@ export class PaisService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  async getExcel(): Promise<Workbook | HttpException> {
+    try {
+      const paises = await this.findAll();
+
+      if (paises instanceof HttpException) {
+        return paises;
+      }
+
+      const book = new Workbook();
+      const sheet: Worksheet = book.addWorksheet('Paises');
+
+      const columns = [
+        { header: '', key: 'bandera', width: 60 },
+        { header: 'Nombre', key: 'nombre', width: 20 },
+        { header: 'Capital', key: 'capital', width: 20 },
+        { header: 'Continente', key: 'continente', width: 20 },
+        { header: 'Moneda', key: 'moneda', width: 20 },
+        { header: 'Poblacion', key: 'poblacion', width: 15 },
+        { header: 'Lenguaje', key: 'lenguaje', width: 20 },
+        { header: 'PNG', key: 'png', width: 20 },
+        { header: 'SVG', key: 'svg', width: 20 },
+        { header: 'Alt', key: 'alt', width: 20 },
+      ];
+
+      // Añadir las columnas al sheet
+      sheet.columns = columns;
+      // Añadir el encabezado que encierra a "PNG", "SVG" y "ALT" en la primera fila
+      sheet.getRow(1).getCell(1).value = 'Bandera';
+      sheet.mergeCells('A1:C1');
+      // Añadir los datos al sheet
+      paises.forEach((pais) => {
+        pais.capital.forEach((capital) => {
+          pais.continente.forEach((continente) => {
+            pais.moneda.forEach((moneda) => {
+              pais.lenguaje.forEach((lenguaje) => {
+                sheet.addRow({
+                  nombre: pais.nombre,
+                  capital: capital,
+                  continente: continente,
+                  moneda: moneda,
+                  poblacion: pais.poblacion,
+                  lenguaje: lenguaje,
+                  png: pais.bandera.png,
+                  svg: pais.bandera.svg,
+                  alt: pais.bandera.alt,
+                });
+              });
+            });
+          });
+        });
+      });
+
+      // Ordenar y filtrar en las columnas
+      sheet.autoFilter = {
+        from: 'A1',
+        to: 'J1',
+      };
+
+      const banderaCell = sheet.getCell('A1');
+      banderaCell.alignment = { vertical: 'middle', horizontal: 'center' };
+      banderaCell.border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        right: { style: 'thin' },
+        bottom: { style: 'thin' },
+      };
+
+      return book;
+    } catch (error) {
+      return new HttpException(
+        'Internal Server Error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  // Formatea la respuesta para que sea más fácil de consumir
+  private formatResponse(pais: IPais): PaisFormated {
+    const paisFormated = {
+      nombre: pais.nombre,
+      capital: pais.capitales.map((capital) => capital.nombre),
+      bandera: {
+        png: pais.png,
+        svg: pais.svg,
+        alt: pais.alt,
+      },
+      moneda: pais.monedas.map((moneda) => moneda.nombre),
+      poblacion: pais.poblacion,
+      continente: pais.continentes.map((continente) => continente.nombre),
+      lenguaje: pais.lenguajes.map((lenguaje) => lenguaje.nombre),
+    };
+    return paisFormated;
   }
 }

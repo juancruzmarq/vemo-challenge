@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,42 +7,42 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model Pais {
-  id           Int           @id @default(autoincrement())
-  nombre       String       @unique 
-  png        String   @unique
-  svg        String   @unique
-  alt        String
-  capitales    Capital[]
-  lenguajes    Lenguaje[]
-  monedas      Moneda[]
-  continentes  Continente[]
+  id          Int          @id @default(autoincrement())
+  nombre      String       @unique
+  png         String       @unique
+  svg         String       @unique
+  alt         String
+  capitales   Capital[]
+  lenguajes   Lenguaje[]
+  monedas     Moneda[]
+  continentes Continente[]
   poblacion   Int
 }
 
 model Continente {
-  id       Int      @id @default(autoincrement())
-  nombre   String   @unique
-  paises   Pais[]
+  id     Int    @id @default(autoincrement())
+  nombre String @unique
+  paises Pais[]
 }
 
 model Capital {
-  id         Int      @id @default(autoincrement())
-  nombre     String   
-  pais       Pais     @relation(fields: [paisId], references: [id])
-  paisId     Int
+  id     Int    @id @default(autoincrement())
+  nombre String
+  pais   Pais   @relation(fields: [paisId], references: [id])
+  paisId Int
+
   @@unique([nombre, paisId])
 }
 
 model Lenguaje {
-  id         Int      @id @default(autoincrement())
-  nombre     String   @unique
-  paises     Pais[]
+  id     Int    @id @default(autoincrement())
+  nombre String @unique
+  paises Pais[]
 }
 
 model Moneda {
-  id         Int      @id @default(autoincrement())
-  nombre     String   @unique
-  paises     Pais[]
+  id     Int    @id @default(autoincrement())
+  nombre String @unique
+  paises Pais[]
 }
