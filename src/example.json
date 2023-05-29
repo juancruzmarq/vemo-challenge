@@ -1,0 +1,29 @@
+{
+  "name": {
+    "common": "Jordan",
+    "official": "Hashemite Kingdom of Jordan",
+    "nativeName": {
+      "ara": {
+        "official": "المملكة الأردنية الهاشمية",
+        "common": "الأردن"
+      }
+    }
+  },
+  "currencies": {
+    "JOD": {
+      "name": "Jordanian dinar",
+      "symbol": "د.ا"
+    }
+  },
+  "capital": ["Amman"],
+  "languages": {
+    "ara": "Arabic"
+  },
+  "population": 10203140,
+  "continents": ["Asia"],
+  "flags": {
+    "png": "https://flagcdn.com/w320/jo.png",
+    "svg": "https://flagcdn.com/jo.svg",
+    "alt": "The flag of Jordan is composed of three equal horizontal bands of black, white and green, with a red isosceles triangle superimposed on the hoist side of the field. This triangle has its base on the hoist end, spans about half the width of the field and bears a small seven-pointed white star at its center."
+  }
+}
