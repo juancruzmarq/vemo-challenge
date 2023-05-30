@@ -2,10 +2,14 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { Actividad } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 import { CreateActividadDto, UpdateActividadDto } from './dto/actividad.dto';
+import { PaisService } from 'src/pais/pais.service';
 
 @Injectable()
 export class ActividadService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly paisService: PaisService,
+  ) {}
 
   async getAllActividades(): Promise<Actividad[] | HttpException> {
     try {
@@ -117,6 +121,11 @@ export class ActividadService {
     actividad: CreateActividadDto,
   ): Promise<Actividad | HttpException> {
     try {
+      const paisExiste = await this.paisService.getPais(pais);
+      if (paisExiste instanceof HttpException) {
+        return paisExiste;
+      }
+
       const actividadCreada = await this.prismaService.actividad.create({
         data: {
           nombre: actividad.nombre,
@@ -149,8 +158,22 @@ export class ActividadService {
         );
       }
 
+      const paisExiste = await this.paisService.getPais(actividad.pais_id);
+      if (paisExiste instanceof HttpException) {
+        return paisExiste;
+      }
+
       const actividadActualizada = await this.prismaService.actividad.update({
         where: { id },
+        select: {
+          id: true,
+          nombre: true,
+          lugar: true,
+          descripcion: true,
+          temporada: true,
+          gratis: true,
+          pais: true,
+        },
         data: {
           nombre: actividad.nombre,
           lugar: actividad.lugar,
@@ -165,6 +188,12 @@ export class ActividadService {
         },
       });
 
+      if (!actividadActualizada) {
+        return new HttpException(
+          'Error al actualizar la actividad',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
       return actividadActualizada;
     } catch (error) {
       return new HttpException(

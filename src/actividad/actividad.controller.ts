@@ -11,9 +11,10 @@ import {
 } from '@nestjs/common';
 import { ActividadService } from './actividad.service';
 import { CreateActividadDto, UpdateActividadDto } from './dto/actividad.dto';
-import { ApiOperation, ApiParam } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { QueryValidationPipe } from 'src/core/pipes/query.pipe';
 
+@ApiTags('Actividad')
 @Controller('actividad')
 export class ActividadController {
   constructor(private readonly actividadService: ActividadService) {}

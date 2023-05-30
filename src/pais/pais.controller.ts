@@ -7,20 +7,36 @@ import {
   HttpStatus,
   Res,
   HttpException,
+  UsePipes,
 } from '@nestjs/common';
 import { PaisService } from './pais.service';
 import { QueryValidationPipe } from 'src/core/pipes/query.pipe';
-import { ApiQuery, ApiOperation, ApiParam } from '@nestjs/swagger';
+import { ApiQuery, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 
+@ApiTags('Pais')
 @Controller('pais')
 export class PaisController {
   constructor(private readonly paisService: PaisService) {}
 
-  @Get()
+  @Get('find')
+  @ApiOperation({ summary: 'Obtener un país por nombre, capital o continente' })
+  @ApiQuery({ name: 'nombre', required: false })
+  @ApiQuery({ name: 'capital', required: false })
+  @ApiQuery({ name: 'continente', required: false })
+  @UsePipes(QueryValidationPipe)
+  async findBy(
+    @Query('nombre') nombre?: string,
+    @Query('capital') capital?: string,
+    @Query('continente') continente?: string,
+  ) {
+    return await this.paisService.getBy(nombre, capital, continente);
+  }
+
+  @Get('/')
   @ApiOperation({ summary: 'Obtener todos los países' })
   async findAll() {
-    return await this.paisService.findAll();
+    return await this.paisService.getPaises();
   }
 
   @Get('/excel')
@@ -47,19 +63,6 @@ export class PaisController {
     }
   }
 
-  @Get('/find')
-  @ApiOperation({ summary: 'Obtener un país por nombre, capital o continente' })
-  @ApiQuery({ name: 'nombre', required: false })
-  @ApiQuery({ name: 'capital', required: false })
-  @ApiQuery({ name: 'continente', required: false })
-  async findBy(
-    @Query('nombre', QueryValidationPipe) nombre: string,
-    @Query('capital', QueryValidationPipe) capital: string,
-    @Query('continente', QueryValidationPipe) continente: string,
-  ) {
-    return await this.paisService.findBy(nombre, capital, continente);
-  }
-
   @Get('/order/:order')
   @ApiOperation({
     summary: 'Ordenar los países por nombre, capital o continente',
@@ -79,6 +82,6 @@ export class PaisController {
     )
     id: number,
   ) {
-    return await this.paisService.findOne(id);
+    return await this.paisService.getPais(id);
   }
 }
