@@ -59,6 +59,10 @@ $ npm run start:prod
 
 http://localhost:3000/api
 
+### Postman
+
+Se encuentra llamado Vemo.postman_collection.json en la raiz del proyecto para importar en Postman
+
 ### Tecnologias
 
 - NodeJS
