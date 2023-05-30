@@ -3,7 +3,7 @@ import { CreatePaisDto } from './dto/pais.dto';
 import { Pais } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 import { IPais, PaisFormated } from 'src/interfaces/pais.formated';
-import { Workbook, Worksheet } from 'exceljs';
+import { Column, Workbook, Worksheet } from 'exceljs';
 
 @Injectable()
 export class PaisService {
@@ -309,8 +309,7 @@ export class PaisService {
       const book = new Workbook();
       const sheet: Worksheet = book.addWorksheet('Paises');
 
-      const columns = [
-        { header: '', key: 'bandera', width: 60 },
+      const columns: Partial<Column>[] = [
         { header: 'Nombre', key: 'nombre', width: 20 },
         { header: 'Capital', key: 'capital', width: 20 },
         { header: 'Continente', key: 'continente', width: 20 },
@@ -322,12 +321,9 @@ export class PaisService {
         { header: 'Alt', key: 'alt', width: 20 },
       ];
 
-      // Añadir las columnas al sheet
       sheet.columns = columns;
-      // Añadir el encabezado que encierra a "PNG", "SVG" y "ALT" en la primera fila
-      sheet.getRow(1).getCell(1).value = 'Bandera';
-      sheet.mergeCells('A1:C1');
-      // Añadir los datos al sheet
+
+      // Se recorre la data para añadir los datos al sheet
       paises.forEach((pais) => {
         pais.capital.forEach((capital) => {
           pais.continente.forEach((continente) => {
@@ -350,20 +346,28 @@ export class PaisService {
         });
       });
 
-      // Ordenar y filtrar en las columnas
       sheet.autoFilter = {
         from: 'A1',
         to: 'J1',
       };
 
-      const banderaCell = sheet.getCell('A1');
-      banderaCell.alignment = { vertical: 'middle', horizontal: 'center' };
-      banderaCell.border = {
-        top: { style: 'thin' },
-        left: { style: 'thin' },
-        right: { style: 'thin' },
-        bottom: { style: 'thin' },
-      };
+      // Estilo al header
+      sheet.eachRow({ includeEmpty: false }, function (row, rowNumber) {
+        if (rowNumber === 1) {
+          row.eachCell((cell) => {
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FF000000' },
+              bgColor: { argb: 'FF000000' },
+            };
+            cell.font = {
+              color: { argb: 'FFFFFFFF' },
+              bold: true,
+            };
+          });
+        }
+      });
 
       return book;
     } catch (error) {
