@@ -53,7 +53,10 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
-- Author - Juan Cruz Marquez
+### Swagger
+
+http://localhost:3000/api
+
 
 ### Tecnologias
 

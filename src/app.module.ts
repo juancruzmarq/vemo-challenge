@@ -9,17 +9,32 @@ import { ConfigModule } from '@nestjs/config';
 import { PaisServiceJob } from './pais/jobs/pais.job.service';
 import { PaisService } from './pais/pais.service';
 
+import { MailService } from './mailer/mail.service';
+import { MailModule } from './mailer/mail.module';
+import { MailJobModule } from './mailer/jobs/mail.job.module';
+import { ActividadModule } from './actividad/actividad.module';
+
 @Module({
   imports: [
     PaisModule,
+    MailModule,
+    MailJobModule,
     PaisJobModule,
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       envFilePath: '.env',
+      isGlobal: true,
     }),
+    ActividadModule,
   ],
   controllers: [AppController],
-  providers: [AppService, PrismaService, PaisServiceJob, PaisService],
+  providers: [
+    AppService,
+    PrismaService,
+    PaisServiceJob,
+    PaisService,
+    MailService,
+  ],
 })
 export class AppModule implements OnModuleInit {
   constructor(private readonly paisServiceJob: PaisServiceJob) {}

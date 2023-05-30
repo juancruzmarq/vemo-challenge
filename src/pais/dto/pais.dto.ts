@@ -12,36 +12,62 @@ interface Nombre {
 }
 
 export class CreatePaisDto {
-  @IsNotEmpty()
-  @IsString()
+  @IsNotEmpty({
+    message: 'El nombre no puede estar vacio',
+  })
+  @IsString({
+    message: 'El nombre debe ser un string',
+  })
   nombre: string;
 
-  @IsNotEmpty()
+  @IsNotEmpty({
+    message: 'La capital no puede estar vacia',
+  })
+  @IsArray({
+    message: 'La capital debe ser un array',
+  })
   capital: Nombre[];
 
-  @IsNotEmpty()
-  @IsArray()
+  @IsNotEmpty({
+    message: 'La moneda no puede estar vacia',
+  })
+  @IsArray({
+    message: 'La moneda debe ser un array',
+  })
   moneda: Nombre[];
 
-  @IsNotEmpty()
-  @IsObject()
+  @IsNotEmpty({
+    message: 'La bandera no puede estar vacia',
+  })
+  @IsObject({
+    message: 'La bandera debe ser un objeto, con los campos png, svg y alt',
+  })
   bandera: Flags;
 
-  @IsNotEmpty()
-  @IsArray()
+  @IsNotEmpty({
+    message: 'El lenguaje no puede estar vacio',
+  })
+  @IsArray({
+    message: 'El lenguaje debe ser un array',
+  })
   lenguaje: Nombre[];
 
-  @IsNotEmpty()
-  @IsArray()
+  @IsNotEmpty({
+    message: 'El continente no puede estar vacio',
+  })
+  @IsArray({
+    message: 'El continente debe ser un array',
+  })
   continente: Nombre[];
 
-  @IsNotEmpty()
-  @IsNumber()
+  @IsNotEmpty({
+    message: 'La poblacion no puede estar vacia',
+  })
+  @IsNumber(
+    {},
+    {
+      message: 'La poblacion debe ser un numero',
+    },
+  )
   poblacion: number;
-}
-
-export class CreateContinenteDto {
-  @IsNotEmpty()
-  @IsString()
-  nombre: string;
 }

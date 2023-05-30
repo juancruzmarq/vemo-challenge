@@ -37,7 +37,7 @@ export class PaisService {
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<PaisFormated | HttpException> {
     try {
       const pais = await this.prismaService.pais.findUnique({
         where: {
@@ -67,7 +67,11 @@ export class PaisService {
     }
   }
 
-  async findBy(nombre: string, capital: string, continente: string) {
+  async findBy(
+    nombre: string,
+    capital: string,
+    continente: string,
+  ): Promise<PaisFormated[] | HttpException> {
     try {
       const paises = await this.prismaService.pais.findMany({
         where: {
@@ -109,7 +113,7 @@ export class PaisService {
     }
   }
 
-  async orderBy(order: string) {
+  async orderBy(order: string): Promise<PaisFormated[] | HttpException> {
     try {
       // Se obtienen todos los países con sus relaciones
       const paises = await this.prismaService.pais.findMany({

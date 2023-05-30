@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import axios from 'axios';
 import { URL_API } from 'src/constants';
@@ -13,23 +13,26 @@ import { PaisService } from 'src/pais/pais.service';
 
 @Injectable()
 export class PaisServiceJob {
+  private logger = new Logger('PaisServiceJob');
   constructor(private readonly paisService: PaisService) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT) // Se ejecuta todos los dias a la medianoche
   async getPaises() {
     try {
-      console.log('Ejecutando cron job');
+      this.logger.log('Obteniendo paises de la API');
       const response = await axios.get<Paises>(URL_API); // Se obtiene la data de la API
       const paises = response.data;
       const paisesFormateados = await this.formatPaises(paises); // Se formatea la data
+
       // Se llama al servicio de pais para crear los paises en la base de datos
       Promise.all(
         paisesFormateados.map(async (pais) => {
           await this.paisService.create(pais);
         }),
       );
+      this.logger.log('Paises creados');
     } catch (error) {
-      console.error('Error al ejecutar el cron job', error);
+      this.logger.error('Error al obtener los paises', error);
       return error;
     }
   }
@@ -37,39 +40,25 @@ export class PaisServiceJob {
   async formatPaises(paises: Paises): Promise<CreatePaisDto[]> {
     try {
       const paisesFormateados: CreatePaisDto[] = [];
+
       paises.forEach((pais: Pais) => {
         const nombre = pais.name.common;
         const capital = pais.capital
-          ? pais.capital.map((capital) => {
-              return {
-                nombre: capital,
-              };
-            })
-          : [
-              {
-                nombre: 'No tiene capital',
-              },
-            ];
+          ? this.getCapitales(pais.capital)
+          : this.noTiene('capital');
 
         const moneda = pais.currencies
           ? this.getMonedas(pais.currencies)
-          : [
-              {
-                nombre: 'No tiene moneda',
-              },
-            ];
+          : this.noTiene('moneda');
+
         const lenguaje = pais.languages
           ? this.getLanguages(pais.languages)
-          : [
-              {
-                nombre: 'No tiene lenguaje',
-              },
-            ];
-        const continente = pais.continents.map((continente) => {
-          return {
-            nombre: continente,
-          };
-        });
+          : this.noTiene('lenguaje');
+
+        const continente = pais.continents
+          ? this.getContinentes(pais.continents)
+          : this.noTiene('continente');
+
         const bandera = pais.flags;
         const poblacion = pais.population;
 
@@ -85,7 +74,7 @@ export class PaisServiceJob {
       });
       return paisesFormateados;
     } catch (error) {
-      console.error('Error al formatear los paises', error);
+      this.logger.error('Error al formatear los paises', error);
       return error;
     }
   }
@@ -98,7 +87,7 @@ export class PaisServiceJob {
       });
       return monedasFormateadas;
     } catch (error) {
-      console.error('Error al formatear las monedas', error);
+      this.logger.error('Error al formatear las monedas', error);
       return error;
     }
   }
@@ -111,8 +100,58 @@ export class PaisServiceJob {
       });
       return languagesFormateados;
     } catch (error) {
-      console.error('Error al formatear los lenguajes', error);
+      this.logger.error('Error al formatear los lenguajes', error);
       return error;
     }
+  }
+
+  private getContinentes(continentes: string[]) {
+    try {
+      const continentsFormateados = continentes.map((continente) => {
+        return {
+          nombre: continente,
+        };
+      });
+      return continentsFormateados;
+    } catch (error) {
+      this.logger.error('Error al formatear los continentes', error);
+      return error;
+    }
+  }
+
+  private getCapitales(capitales: string[]) {
+    try {
+      const capitalesFormateadas = capitales.map((capital) => {
+        return {
+          nombre: capital,
+        };
+      });
+      return capitalesFormateadas;
+    } catch (error) {
+      this.logger.error('Error al obtener las capitales', error);
+      return error;
+    }
+  }
+
+  private getBandera(bandera: string[]) {
+    try {
+      const banderaFormateada = bandera.map((bandera) => {
+        return {
+          nombre: bandera,
+        };
+      });
+      return banderaFormateada;
+    } catch (error) {
+      this.logger.error('Error al obtener las banderas', error);
+      return error;
+    }
+  }
+
+  private noTiene(propiedad: string) {
+    return [
+      {
+        nombre: `No tiene ${propiedad}`,
+      },
+    ];
   }
 }

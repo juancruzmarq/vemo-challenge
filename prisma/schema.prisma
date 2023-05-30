@@ -17,6 +17,7 @@ model Pais {
   lenguajes   Lenguaje[]
   monedas     Moneda[]
   continentes Continente[]
+  actividades Actividad[]
   poblacion   Int
 }
 
@@ -45,4 +46,15 @@ model Moneda {
   id     Int    @id @default(autoincrement())
   nombre String @unique
   paises Pais[]
+}
+
+model Actividad {
+  id          Int      @id @default(autoincrement())
+  nombre      String   
+  lugar       String
+  descripcion String?
+  temporada   String  
+  gratis      Boolean
+  pais        Pais     @relation(fields: [paisId], references: [id])
+  paisId      Int
 }
