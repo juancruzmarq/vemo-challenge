@@ -9,7 +9,7 @@ import { Column, Workbook, Worksheet } from 'exceljs';
 export class PaisService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async findAll(): Promise<PaisFormated[] | HttpException> {
+  async getPaises(): Promise<PaisFormated[] | HttpException> {
     try {
       const paises = await this.prismaService.pais.findMany({
         include: {
@@ -38,7 +38,7 @@ export class PaisService {
     }
   }
 
-  async findOne(id: number): Promise<PaisFormated | HttpException> {
+  async getPais(id: number): Promise<PaisFormated | HttpException> {
     try {
       const pais = await this.prismaService.pais.findUnique({
         where: {
@@ -54,7 +54,7 @@ export class PaisService {
       });
 
       if (!pais) {
-        return new HttpException('Not Found', HttpStatus.NOT_FOUND);
+        return new HttpException('El pais no existe', HttpStatus.NOT_FOUND);
       }
 
       // Se formatea la respuesta para que sea más fácil de consumir
@@ -63,13 +63,13 @@ export class PaisService {
       return paisFormated;
     } catch (error) {
       return new HttpException(
-        'Internal Server Error',
+        'Error al obtener el pais',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
-  async findBy(
+  async getBy(
     nombre: string,
     capital: string,
     continente: string,
@@ -308,7 +308,7 @@ export class PaisService {
 
   async getExcel(): Promise<Workbook | HttpException> {
     try {
-      const paises = await this.findAll();
+      const paises = await this.getPaises();
 
       if (paises instanceof HttpException) {
         return paises;
