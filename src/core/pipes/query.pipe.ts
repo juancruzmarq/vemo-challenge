@@ -41,7 +41,6 @@ export class QueryValidationPipe implements PipeTransform {
           }
           break;
         case 'temporada':
-          console.log(value);
           if (!value) return value;
           value = this.capitalize(value);
           if (!this.temporadas.includes(value)) {

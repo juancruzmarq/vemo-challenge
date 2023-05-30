@@ -57,7 +57,6 @@ $ npm run start:prod
 
 http://localhost:3000/api
 
-
 ### Tecnologias
 
 - NodeJS
@@ -78,3 +77,7 @@ http://localhost:3000/api
 - En el caso de la busqueda por orden alfabetico, se ordena solo en una propiedad, es decir, si se ordena por nombre, no se puede ordenar por capital.
 - Se omitio la creacion de test unitarios y de integracion
 - En el enunciado se aclara que la obtencion de los datos de la API se puede hacer al iniciar la aplicacion o en intervalos regulares, se opto por ambas opciones, al iniciar la aplicacion y cada 24 horas, para que existan datos en la base de datos al probar la aplicacion.
+
+<h6>Excel</h6>
+
+src/example.xlsx > Excel de ejemplo que se obtiene en la ruta /pais/excel

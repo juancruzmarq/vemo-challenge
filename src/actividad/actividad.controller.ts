@@ -1,14 +1,16 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import { ActividadService } from './actividad.service';
-import { CreateActividadDto } from './dto/actividad.dto';
+import { CreateActividadDto, UpdateActividadDto } from './dto/actividad.dto';
 import { ApiOperation, ApiParam } from '@nestjs/swagger';
 import { QueryValidationPipe } from 'src/core/pipes/query.pipe';
 
@@ -44,6 +46,7 @@ export class ActividadController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Obtener todas las actividades' })
   async getActividades() {
     return this.actividadService.getAllActividades();
   }
@@ -55,6 +58,23 @@ export class ActividadController {
     @Param('pais', ParseIntPipe) pais: number,
     @Body() actividad: CreateActividadDto,
   ) {
-    return this.actividadService.createActividad(pais, actividad);
+    return this.actividadService.create(pais, actividad);
+  }
+
+  @Put(':id')
+  @ApiOperation({ summary: 'Actualizar actividad' })
+  @ApiParam({ name: 'id', type: Number, required: true })
+  async updateActividad(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() actividad: UpdateActividadDto,
+  ) {
+    return this.actividadService.update(id, actividad);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Eliminar actividad' })
+  @ApiParam({ name: 'id', type: Number, required: true })
+  async deleteActividad(@Param('id', ParseIntPipe) id: number) {
+    return this.actividadService.delete(id);
   }
 }

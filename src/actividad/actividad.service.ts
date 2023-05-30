@@ -1,7 +1,7 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { Actividad } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
-import { CreateActividadDto } from './dto/actividad.dto';
+import { CreateActividadDto, UpdateActividadDto } from './dto/actividad.dto';
 
 @Injectable()
 export class ActividadService {
@@ -112,7 +112,7 @@ export class ActividadService {
     }
   }
 
-  async createActividad(
+  async create(
     pais: number,
     actividad: CreateActividadDto,
   ): Promise<Actividad | HttpException> {
@@ -131,6 +131,70 @@ export class ActividadService {
     } catch (error) {
       return new HttpException(
         'Error al crear la actividad',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async update(id: number, actividad: UpdateActividadDto) {
+    try {
+      const actividadExiste = await this.prismaService.actividad.findUnique({
+        where: { id },
+      });
+
+      if (!actividadExiste) {
+        return new HttpException(
+          'La actividad no existe',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      const actividadActualizada = await this.prismaService.actividad.update({
+        where: { id },
+        data: {
+          nombre: actividad.nombre,
+          lugar: actividad.lugar,
+          descripcion: actividad.descripcion,
+          temporada: actividad.temporada,
+          gratis: actividad.gratis,
+          pais: {
+            connect: {
+              id: actividad.pais_id,
+            },
+          },
+        },
+      });
+
+      return actividadActualizada;
+    } catch (error) {
+      return new HttpException(
+        'Error al actualizar la actividad',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async delete(id: number) {
+    try {
+      const actividadExiste = await this.prismaService.actividad.findUnique({
+        where: { id },
+      });
+
+      if (!actividadExiste) {
+        return new HttpException(
+          'La actividad no existe',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      const actividadEliminada = await this.prismaService.actividad.delete({
+        where: { id },
+      });
+
+      return actividadEliminada;
+    } catch (error) {
+      return new HttpException(
+        'Error al eliminar la actividad',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

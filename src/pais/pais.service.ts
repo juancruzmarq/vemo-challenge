@@ -17,6 +17,7 @@ export class PaisService {
           continentes: true,
           lenguajes: true,
           monedas: true,
+          actividades: true,
         },
       });
 
@@ -48,6 +49,7 @@ export class PaisService {
           continentes: true,
           lenguajes: true,
           monedas: true,
+          actividades: true,
         },
       });
 
@@ -92,6 +94,7 @@ export class PaisService {
           continentes: true,
           lenguajes: true,
           monedas: true,
+          actividades: true,
         },
       });
 
@@ -122,6 +125,7 @@ export class PaisService {
           continentes: true,
           lenguajes: true,
           monedas: true,
+          actividades: true,
         },
       });
 
@@ -323,36 +327,71 @@ export class PaisService {
         { header: 'PNG', key: 'png', width: 20 },
         { header: 'SVG', key: 'svg', width: 20 },
         { header: 'Alt', key: 'alt', width: 20 },
+        { header: 'Actividad', key: 'actividad', width: 20 },
+        { header: 'Lugar', key: 'lugar', width: 20 },
+        { header: 'Descripcion', key: 'descripcion', width: 20 },
+        { header: 'Temporada', key: 'temporada', width: 20 },
+        { header: 'Gratis', key: 'gratis', width: 20 },
       ];
 
       sheet.columns = columns;
 
       // Se recorre la data para añadir los datos al sheet
+      const rows = [];
+
       paises.forEach((pais) => {
-        pais.capital.forEach((capital) => {
-          pais.continente.forEach((continente) => {
-            pais.moneda.forEach((moneda) => {
-              pais.lenguaje.forEach((lenguaje) => {
-                sheet.addRow({
-                  nombre: pais.nombre,
-                  capital: capital,
-                  continente: continente,
-                  moneda: moneda,
-                  poblacion: pais.poblacion,
-                  lenguaje: lenguaje,
-                  png: pais.bandera.png,
-                  svg: pais.bandera.svg,
-                  alt: pais.bandera.alt,
-                });
-              });
-            });
-          });
-        });
+        const actividades = pais.actividades || [];
+        const capitales = pais.capital || [];
+        const continentes = pais.continente || [];
+        const monedas = pais.moneda || [];
+        const lenguajes = pais.lenguaje || [];
+
+        const rowCount = Math.max(
+          capitales.length,
+          continentes.length,
+          monedas.length,
+          lenguajes.length,
+          actividades.length,
+        );
+
+        for (let i = 0; i < rowCount; i++) {
+          const capital = capitales[i % capitales.length] || '';
+          const continente = continentes[i % continentes.length] || '';
+          const moneda = monedas[i % monedas.length] || '';
+          const lenguaje = lenguajes[i % lenguajes.length] || '';
+
+          const row = {
+            nombre: pais.nombre,
+            capital: capital,
+            continente: continente,
+            moneda: moneda,
+            poblacion: pais.poblacion,
+            lenguaje: lenguaje,
+            png: pais.bandera?.png,
+            svg: pais.bandera?.svg,
+            alt: pais.bandera?.alt || '',
+            actividad: i < actividades.length ? actividades[i].nombre : '',
+            lugar: i < actividades.length ? actividades[i].lugar : '',
+            descripcion:
+              i < actividades.length ? actividades[i].descripcion : '',
+            temporada: i < actividades.length ? actividades[i].temporada : '',
+            gratis:
+              i < actividades.length
+                ? actividades[i].gratis
+                  ? 'Si'
+                  : 'No'
+                : '',
+          };
+
+          rows.push(row);
+        }
       });
+
+      sheet.addRows(rows);
 
       sheet.autoFilter = {
         from: 'A1',
-        to: 'J1',
+        to: 'N1',
       };
 
       // Estilo al header
@@ -396,6 +435,15 @@ export class PaisService {
       poblacion: pais.poblacion,
       continente: pais.continentes.map((continente) => continente.nombre),
       lenguaje: pais.lenguajes.map((lenguaje) => lenguaje.nombre),
+      actividades: pais.actividades.map((actividad) => {
+        return {
+          nombre: actividad.nombre,
+          lugar: actividad.lugar,
+          descripcion: actividad.descripcion,
+          temporada: actividad.temporada,
+          gratis: actividad.gratis,
+        };
+      }),
     };
     return paisFormated;
   }
