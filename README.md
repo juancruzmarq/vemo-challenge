@@ -53,6 +53,8 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
+- Cambiar las variables en el archivo .env para configurar el mailer y la base de datos
+
 ### Swagger
 
 http://localhost:3000/api
