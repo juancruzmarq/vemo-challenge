@@ -1,11 +1,13 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PaisModule } from './pais/pais.module';
 import { ScheduleModule } from '@nestjs/schedule';
-import { PaisJobModule } from './jobs/pais/pais.job.module';
+import { PaisJobModule } from './pais/jobs/pais.job.module';
 import { PrismaService } from './prisma.service';
 import { ConfigModule } from '@nestjs/config';
+import { PaisServiceJob } from './pais/jobs/pais.job.service';
+import { PaisService } from './pais/pais.service';
 
 @Module({
   imports: [
@@ -17,6 +19,12 @@ import { ConfigModule } from '@nestjs/config';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService, PrismaService],
+  providers: [AppService, PrismaService, PaisServiceJob, PaisService],
 })
-export class AppModule {}
+export class AppModule implements OnModuleInit {
+  constructor(private readonly paisServiceJob: PaisServiceJob) {}
+
+  async onModuleInit() {
+    await this.paisServiceJob.getPaises();
+  }
+}

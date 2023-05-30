@@ -29,6 +29,17 @@ Debes desarrollar una API que permita mostrar información sobre los países del
 $ npm install
 ```
 
+## Conexion a la base de datos
+
+1 - Crear una base de datos en PostgreSQL
+2 - Crear un archivo .env en la raiz del proyecto con el siguiente contenido:
+
+```bash
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/vemo?schema=public"
+```
+
+Donde postgres:postgres es el usuario y contraseña de la base de datos y vemo es el nombre de la base de datos. 5432 es el puerto por defecto de PostgreSQL y public es el schema por defecto.
+
 ## Levantar el proyecto
 
 ```bash
@@ -44,17 +55,6 @@ $ npm run start:prod
 
 - Author - Juan Cruz Marquez
 
-### Descripcion de la solucion
-
-1 - Revision del enunciado
-2 - Creacion basica del proyecto
-3 - Investigacion de la API a utilizar
-4 - Creacion de la base de datos y sus modelos
-5 - Creacion de los DTOs
-6 - Creacion de los controladores
-7 - Creacion de los servicios
-8 - Creacion de los jobs
-
 ### Tecnologias
 
 - NodeJS
@@ -64,6 +64,7 @@ $ npm run start:prod
 - Swagger
 - class-validator
 - class-transformer
+- ExcelJS
 
 #### Omiciones y supuestos
 
@@ -73,3 +74,4 @@ $ npm run start:prod
 - Se omitio crear en cada llamada al job los registros, por el contrario se crea una vez y luego se actualiza.
 - En el caso de la busqueda por orden alfabetico, se ordena solo en una propiedad, es decir, si se ordena por nombre, no se puede ordenar por capital.
 - Se omitio la creacion de test unitarios y de integracion
+- En el enunciado se aclara que la obtencion de los datos de la API se puede hacer al iniciar la aplicacion o en intervalos regulares, se opto por ambas opciones, al iniciar la aplicacion y cada 24 horas, para que existan datos en la base de datos al probar la aplicacion.

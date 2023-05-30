@@ -29,7 +29,7 @@ export class PaisServiceJob {
         }),
       );
     } catch (error) {
-      console.log('Error al ejecutar el cron job', error);
+      console.error('Error al ejecutar el cron job', error);
       return error;
     }
   }
@@ -85,7 +85,7 @@ export class PaisServiceJob {
       });
       return paisesFormateados;
     } catch (error) {
-      console.log('Error al formatear los paises', error);
+      console.error('Error al formatear los paises', error);
       return error;
     }
   }
@@ -98,7 +98,7 @@ export class PaisServiceJob {
       });
       return monedasFormateadas;
     } catch (error) {
-      console.log('Error al formatear las monedas', error);
+      console.error('Error al formatear las monedas', error);
       return error;
     }
   }
@@ -111,7 +111,7 @@ export class PaisServiceJob {
       });
       return languagesFormateados;
     } catch (error) {
-      console.log('Error al formatear los lenguajes', error);
+      console.error('Error al formatear los lenguajes', error);
       return error;
     }
   }

@@ -6,7 +6,6 @@ import {
   ParseIntPipe,
   HttpStatus,
   Res,
-  Post,
   HttpException,
 } from '@nestjs/common';
 import { PaisService } from './pais.service';
@@ -19,7 +18,6 @@ export class PaisController {
   constructor(private readonly paisService: PaisService) {}
 
   @Get()
-  // api description
   @ApiOperation({ summary: 'Obtener todos los países' })
   async findAll() {
     return await this.paisService.findAll();
@@ -63,7 +61,9 @@ export class PaisController {
   }
 
   @Get('/order/:order')
-  @ApiOperation({ summary: 'Order countries by name, capital or continent' })
+  @ApiOperation({
+    summary: 'Ordenar los países por nombre, capital o continente',
+  })
   @ApiParam({ name: 'order', required: true })
   async orderBy(@Param('order') order: string) {
     return await this.paisService.orderBy(order);
